@@ -1,0 +1,7 @@
+{
+    "git.ignoreLimitWarning": true
+}
+{
+    "python.pythonPath": "./venv/bin/python"
+}
+  
