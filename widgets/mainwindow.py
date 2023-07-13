@@ -30,10 +30,12 @@ import icons_rc
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    # def __init__(self):
+    def __init__(self, default_folder=None):
         super(MainWindow, self).__init__()
         self.setupUi(self)
         self.init_ui()
+
         self.image_root: str = None
         self.label_root:str = None
 
@@ -59,6 +61,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.reset_action()
         self.init_segment_anything()
 
+        self.default_folder = default_folder.input
+        dir = self.default_folder
+        # self.default_folder = os.path.expanduser('~') 
+        if dir:
+            self.files_list.clear()
+            self.files_dock_widget.listWidget.clear()
+
+            files = []
+            suffixs = tuple(['{}'.format(fmt.data().decode('ascii').lower()) for fmt in QtGui.QImageReader.supportedImageFormats()])
+            for f in os.listdir(dir):
+                if f.lower().endswith(suffixs):
+                    # f = os.path.join(dir, f)
+                    files.append(f)
+            files = sorted(files)
+            self.files_list = files        
+
+        self.current_index = 0
+
+        self.image_root = dir
+        self.actionOpen_dir.setStatusTip("Image root: {}".format(self.image_root))
+        if self.label_root is None:
+            self.label_root = dir
+            self.actionSave_dir.setStatusTip("Label root: {}".format(self.label_root))
+
+        self.show_image(self.current_index)
     def init_segment_anything(self):
         if os.path.exists('./segment_any/sam_vit_h_4b8939.pth'):
             self.statusbar.showMessage('Find the checkpoint named {}.'.format('sam_vit_h_4b8939.pth'))
@@ -87,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelGPUResource.setText('segment anything unused.')
 
     def init_ui(self):
-        #
+        
         self.setting_dialog = SettingDialog(parent=self, mainwindow=self)
 
         self.labels_dock_widget = LabelsDockWidget(mainwindow=self)
@@ -194,6 +221,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.setWindowTitle('*{}'.format(self.current_label.label_path))
 
     def open_dir(self):
+       
+        if self.default_folder: 
+            dir = QtWidgets.QFileDialog.getExistingDirectory(self, directory=self.default_folder)
+        else:
+            dir = QtWidgets.QFileDialog.getExistingDirectory(self)
+       
         dir = QtWidgets.QFileDialog.getExistingDirectory(self)
         if dir:
             self.files_list.clear()
