@@ -84,8 +84,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.label_root is None:
             self.label_root = dir
             self.actionSave_dir.setStatusTip("Label root: {}".format(self.label_root))
-
         self.show_image(self.current_index)
+
     def init_segment_anything(self):
         if os.path.exists('./segment_any/sam_vit_h_4b8939.pth'):
             self.statusbar.showMessage('Find the checkpoint named {}.'.format('sam_vit_h_4b8939.pth'))
@@ -164,7 +164,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.trans = QtCore.QTranslator()
 
-    def translate(self, language='zh'):
+    def translate(self, language='en'):
         if language == 'zh':
             self.trans.load('ui/zh_CN')
         else:
@@ -228,20 +228,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             dir = QtWidgets.QFileDialog.getExistingDirectory(self)
        
         dir = QtWidgets.QFileDialog.getExistingDirectory(self)
+        # if dir:
+        #     self.files_list.clear()
+        #     self.files_dock_widget.listWidget.clear()
+
+        #     files = []
+        #     suffixs = tuple(['{}'.format(fmt.data().decode('ascii').lower()) for fmt in QtGui.QImageReader.supportedImageFormats()])
+        #     for f in os.listdir(dir):
+        #         if f.lower().endswith(suffixs):
+        #             # f = os.path.join(dir, f)
+        #             files.append(f)
+        #     files = sorted(files)
+        #     self.files_list = files
+
+        #     self.files_dock_widget.update_widget()
         if dir:
             self.files_list.clear()
             self.files_dock_widget.listWidget.clear()
 
-            files = []
             suffixs = tuple(['{}'.format(fmt.data().decode('ascii').lower()) for fmt in QtGui.QImageReader.supportedImageFormats()])
-            for f in os.listdir(dir):
-                if f.lower().endswith(suffixs):
-                    # f = os.path.join(dir, f)
-                    files.append(f)
-            files = sorted(files)
-            self.files_list = files
+            files = [f for f in os.listdir(dir) if f.lower().endswith(suffixs)]
 
+            self.files_list = files
             self.files_dock_widget.update_widget()
+
 
         self.current_index = 0
 
